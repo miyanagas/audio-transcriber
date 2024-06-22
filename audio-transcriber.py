@@ -1,5 +1,6 @@
 import speech_recognition as sr
 from pydub import AudioSegment
+import os
 
 def convert_audio_format(input_file, output_file, target_format="wav"):
     audio = AudioSegment.from_file(input_file)
@@ -19,7 +20,8 @@ def transcribe_audio(file_path, lang="ko-KR"):
 input_file = input("Enter the path of the audio file: ")
 output_file = input_file.split('.')[0] + ".wav"
 
-convert_audio_format(input_file, output_file)
+if not os.path.exists(output_file):
+    convert_audio_format(input_file, output_file)
 
 transcribed_text = transcribe_audio(output_file)
 
