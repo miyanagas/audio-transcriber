@@ -1,7 +1,15 @@
 import speech_recognition as sr
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
-import os
+import os, ffmpeg
+
+def convert_mp4_to_wav(input_file, output_file):
+    print("Converting mp4 to wav...")
+    stream = ffmpeg.input(input_file)
+    stream = ffmpeg.output(stream, output_file)
+    ffmpeg.run(stream)
+    print("Conversion completed.")
+    return output_file
 
 def split_audio(input_file, min_silence_len=1500, silence_thresh=-30, keep_silence=500):
     audio = AudioSegment.from_file(input_file)
@@ -20,6 +28,10 @@ def transcribe_audio(file_path, lang="ko"):
         return None
 
 input_file = input("Enter the path of the audio file: ")
+if input_file.split(".")[-1] == "mp4":
+    output_file = input_file.replace(".mp4", ".wav")
+    convert_mp4_to_wav(input_file, output_file)
+    input_file = output_file
 
 chunks = split_audio(input_file)
 for i, chunk in enumerate(chunks):
