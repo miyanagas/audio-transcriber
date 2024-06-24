@@ -9,7 +9,17 @@ def convert_mp4_to_wav(input_file, output_file):
     stream = ffmpeg.output(stream, output_file)
     ffmpeg.run(stream)
     print("Conversion completed.")
-    return output_file
+
+def audio_volume_normalizer(input_file, output_file):
+    print("Normalizing audio volume...")
+    audio = AudioSegment.from_file(input_file)
+    print("Audio dBFS:", audio.dBFS)
+    while audio.dBFS < -10:
+        audio = audio.apply_gain(+1)
+    processed_audio = audio.apply_gain(+1)
+    print("Processed audio dBFS:", processed_audio.dBFS)
+    processed_audio.export(output_file, format="wav")
+    print("Normalization completed.")
 
 def split_audio(input_file, min_silence_len=1500, silence_thresh=-30, keep_silence=500):
     audio = AudioSegment.from_file(input_file)
@@ -33,7 +43,11 @@ if input_file.split(".")[-1] == "mp4":
     convert_mp4_to_wav(input_file, output_file)
     input_file = output_file
 
-chunks = split_audio(input_file)
+audio_volume_normalizer(input_file, "normalized-audio.wav")
+# Stop here until enter key is pressed
+input("Press Enter to continue...")
+
+chunks = split_audio("normalized-audio.wav")
 for i, chunk in enumerate(chunks):
     if not os.path.exists("splited-audio"):
         os.makedirs("splited-audio")
